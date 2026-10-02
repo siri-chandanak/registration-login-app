@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { registerUser } from "../services/authService";
 
 function Register() {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     setFormData({
@@ -23,23 +25,12 @@ function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+    setMessage("");
+    setLoading(true);
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
-      }
+    try {
+      const data = await registerUser(formData);
+
       setMessage(data.message);
 
       setTimeout(() => {
@@ -47,6 +38,8 @@ function Register() {
       }, 1000);
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,10 +82,13 @@ function Register() {
             placeholder="Password"
             value={formData.password}
             onChange={handleChange}
+            minLength={6}
             required
           />
 
-          <button type="submit">Register</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Registering..." : "Register"}
+          </button>
         </form>
 
         {message && <p>{message}</p>}

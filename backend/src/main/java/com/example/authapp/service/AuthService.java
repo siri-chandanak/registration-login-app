@@ -1,14 +1,11 @@
 package com.example.authapp.service;
 
 import com.example.authapp.dto.RegisterRequest;
+import com.example.authapp.exception.InvalidCredentialsException;
 import com.example.authapp.model.User;
 import com.example.authapp.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
-import com.example.authapp.exception.InvalidCredentialsException;
-import com.example.authapp.exception.InvalidCredentialsException;
 
 @Service
 public class AuthService {
@@ -42,6 +39,7 @@ public class AuthService {
 
         return userRepository.save(user);
     }
+
     public User login(String email, String password) {
 
         User user = userRepository.findByEmail(email)
@@ -61,19 +59,5 @@ public class AuthService {
         }
 
         return user;
-    }
-
-    @ExceptionHandler(InvalidCredentialsException.class)
-    public ResponseEntity<Map<String, String>> handleInvalidCredentials(
-            InvalidCredentialsException exception
-    ) {
-
-        Map<String, String> response = new HashMap<>();
-
-        response.put("message", exception.getMessage());
-
-        return ResponseEntity
-                .status(HttpStatus.UNAUTHORIZED)
-                .body(response);
     }
 }

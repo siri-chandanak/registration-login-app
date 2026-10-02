@@ -1,5 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import {
+  loginUser,
+  saveToken,
+} from "../services/authService";
 
 function Login() {
   const navigate = useNavigate();
@@ -10,40 +14,35 @@ function Login() {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     setFormData({
       ...formData,
       [event.target.name]: event.target.value,
     });
+
+    setMessage("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    setMessage("");
+    setLoading(true);
+
     try {
-      const response = await fetch(
-        "http://localhost:8080/api/auth/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const data = await loginUser(formData);
 
-      const data = await response.json();
-      
-      if (!response.ok) {
-        throw new Error(data.message || "Login failed");
-      }
+      console.log("LOGIN RESPONSE:", data);
 
-      localStorage.setItem("user", JSON.stringify(data));
+      saveToken(data.token);
 
       navigate("/dashboard");
     } catch (error) {
       setMessage(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -71,10 +70,16 @@ function Login() {
             required
           />
 
-          <button type="submit">Login</button>
+          <button type="submit" disabled={loading}>
+            {loading ? "Logging in..." : "Login"}
+          </button>
         </form>
 
-        {message && <p>{message}</p>}
+        {message && (
+          <p className="error-message">
+            {message}
+          </p>
+        )}
 
         <p>
           Don't have an account?{" "}

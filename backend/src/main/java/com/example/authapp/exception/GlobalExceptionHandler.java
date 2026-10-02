@@ -12,16 +12,17 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Map<String, String>> handleRuntimeException(
-            RuntimeException exception
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<Map<String, String>> handleInvalidCredentials(
+            InvalidCredentialsException exception
     ) {
 
         Map<String, String> response = new HashMap<>();
+
         response.put("message", exception.getMessage());
 
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(response);
     }
 
@@ -44,5 +45,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(errors);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(
+            RuntimeException exception
+    ) {
+
+        Map<String, String> response = new HashMap<>();
+
+        response.put("message", exception.getMessage());
+
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(response);
     }
 }
